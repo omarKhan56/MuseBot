@@ -1,0 +1,38 @@
+export const translations = {
+  en: {
+    welcome: 'Welcome to Museum Ticketing',
+    chat: 'Chat with Assistant',
+    bookNow: 'Book Now',
+    ticketType: 'Ticket Type',
+    quantity: 'Quantity',
+    total: 'Total',
+    payNow: 'Pay Now',
+  },
+  hi: {
+    welcome: 'संग्रहालय टिकट बुकिंग में आपका स्वागत है',
+    chat: 'सहायक से बात करें',
+    bookNow: 'अभी बुक करें',
+    ticketType: 'टिकट का प्रकार',
+    quantity: 'मात्रा',
+    total: 'कुल',
+    payNow: 'अभी भुगतान करें',
+  },
+  es: {
+    welcome: 'Bienvenido a la reserva de entradas del museo',
+    chat: 'Chat con asistente',
+    bookNow: 'Reservar ahora',
+    ticketType: 'Tipo de entrada',
+    quantity: 'Cantidad',
+    total: 'Total',
+    payNow: 'Pagar ahora',
+  },
+  fr: {
+    welcome: 'Bienvenue à la billetterie du musée',
+    chat: 'Discuter avec l\'assistant',
+    bookNow: 'Réserver maintenant',
+    ticketType: 'Type de billet',
+    quantity: 'Quantité',
+    total: 'Total',
+    payNow: 'Payer maintenant',
+  },
+};
