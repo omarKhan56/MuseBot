@@ -1,3 +1,4 @@
+//app/api/payment/verify/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { supabase } from '@/lib/supabase';

@@ -1,3 +1,4 @@
+//components/AnalyticsDashboard.tsx
 'use client';
 
 import { useEffect, useState } from 'react';

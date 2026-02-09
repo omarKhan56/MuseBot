@@ -1,3 +1,4 @@
+//components/ChatWidget.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -17,6 +18,8 @@ export default function ChatWidget() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+
   const [bookingData, setBookingData] = useState({
     visitor_name: '',
     email: '',
@@ -44,6 +47,36 @@ export default function ChatWidget() {
   };
 
   const totalAmount = ticketPrices[bookingData.ticket_type] * (bookingData.quantity || 1);
+  // 🔥 Chatbot → Booking extraction helper
+const extractBookingFromChat = (message: string) => {
+  const lower = message.toLowerCase();
+
+  // Quantity
+  const qtyMatch = message.match(/\d+/);
+  const quantity = qtyMatch ? parseInt(qtyMatch[0]) : 1;
+
+  // Ticket type
+  let ticket_type = 'General Admission (Adult)';
+  if (lower.includes('child')) ticket_type = 'General Admission (Child)';
+  if (lower.includes('student')) ticket_type = 'Student (with ID)';
+  if (lower.includes('senior')) ticket_type = 'Senior Citizen';
+  if (lower.includes('vip')) ticket_type = 'VIP Tour';
+
+  // Visit date
+  let visit_date = '';
+  if (lower.includes('tomorrow')) {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    visit_date = d.toISOString().split('T')[0];
+  }
+
+  return {
+    quantity,
+    ticket_type,
+    visit_date,
+  };
+};
+
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -63,7 +96,8 @@ export default function ChatWidget() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: input,
+          message: userMessage.content,
+
           history: messages,
         }),
       });
@@ -79,25 +113,85 @@ export default function ChatWidget() {
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Check if user wants to book
-      const lowerInput = input.toLowerCase();
-      if (
-        lowerInput.includes('book') ||
-        lowerInput.includes('ticket') ||
-        lowerInput.includes('buy') ||
-        lowerInput.includes('purchase')
-      ) {
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'assistant',
-              content:
-                "Perfect! Click the '🎫 Book Now' button at the top and I'll get you sorted in no time!",
-              timestamp: new Date(),
-            },
-          ]);
-        }, 500);
-      }
+      const lowerInput = userMessage.content.toLowerCase();
+      // ❌ Handle cancel / edit before confirmation
+if (
+  awaitingConfirmation &&
+  (lowerInput.includes('cancel') ||
+   lowerInput.includes('no') ||
+   lowerInput.includes('edit'))
+) {
+  setAwaitingConfirmation(false);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: 'assistant',
+      content:
+        '❌ No problem. Booking cancelled. You can start again whenever you’re ready.',
+      timestamp: new Date(),
+    },
+  ]);
+
+  setLoading(false);
+  return; // ⛔ STOP further processing
+}
+
+      // ✅ Handle confirmation from user (yes / proceed / ok)
+const confirmation =
+  awaitingConfirmation &&
+  ['yes', 'proceed', 'continue', 'ok'].includes(lowerInput);
+
+if (confirmation) {
+  setAwaitingConfirmation(false);
+  setShowBookingForm(true);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: 'assistant',
+      content: '✅ Great! Please review your booking details below.',
+      timestamp: new Date(),
+    },
+  ]);
+
+  setLoading(false);
+  return; // ⛔ VERY IMPORTANT: stop here
+}
+
+
+const bookingIntent =
+  lowerInput.includes('book') ||
+  lowerInput.includes('reserve')||
+  lowerInput.includes('buy') ||
+  lowerInput.includes('purchase');
+
+if (bookingIntent && !awaitingConfirmation) {
+  const extracted = extractBookingFromChat(userMessage.content);
+
+  setBookingData((prev) => ({
+    ...prev,
+    ticket_type: extracted.ticket_type,
+    quantity: extracted.quantity,
+    visit_date: extracted.visit_date || prev.visit_date,
+  }));
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: 'assistant',
+      content:
+        `🎟️ I can book ${extracted.quantity} ${extracted.ticket_type} ticket(s)` +
+        `${extracted.visit_date ? ` for ${extracted.visit_date}` : ''}.  
+Would you like to proceed? (Yes / Edit / Cancel)`,
+      timestamp: new Date(),
+    },
+  ]);
+
+  setAwaitingConfirmation(true);
+}
+
+
     } catch (error) {
       console.error('Chat error:', error);
       setMessages((prev) => [
@@ -161,14 +255,19 @@ export default function ChatWidget() {
           </div>
         </div>
         {!showBookingForm && (
-          <button
-            onClick={() => setShowBookingForm(true)}
-            className="bg-white/20 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/30 transition-all duration-300 flex items-center gap-2 text-sm font-semibold border border-white/30 hover:scale-105"
-          >
-            <Ticket className="w-4 h-4" />
-            Book Now
-          </button>
-        )}
+  <button
+    onClick={() => {
+      setAwaitingConfirmation(false); // ✅ reset chatbot flow
+      setShowBookingForm(true);        // ✅ open manual booking
+    }}
+    className="bg-white/20 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl hover:bg-white/30 transition-all duration-300 flex items-center gap-2 text-sm font-semibold border border-white/30 hover:scale-105"
+  >
+    <Ticket className="w-4 h-4" />
+    Book Now
+  </button>
+)}
+
+
       </div>
 
       {!showBookingForm ? (

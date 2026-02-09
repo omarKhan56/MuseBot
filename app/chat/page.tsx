@@ -1,3 +1,4 @@
+//app/chat/page.tsx
 import ChatWidget from '@/components/ChatWidget';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';

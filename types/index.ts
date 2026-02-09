@@ -1,3 +1,4 @@
+//types/index.ts
 export interface Booking {
   id?: string;
   visitor_name: string;

@@ -1,3 +1,4 @@
+//components/LanguageSelector.tsx
 'use client';
 
 import { useState } from 'react';

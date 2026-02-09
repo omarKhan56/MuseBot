@@ -1,3 +1,4 @@
+//lib/translations.ts
 export const translations = {
   en: {
     welcome: 'Welcome to Museum Ticketing',

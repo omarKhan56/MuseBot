@@ -1,3 +1,4 @@
+//components/TicketCard.tsx
 'use client';
 
 import { Calendar, User, QrCode } from 'lucide-react';

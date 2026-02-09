@@ -1,3 +1,4 @@
+//app/page.tsx
 import Link from 'next/link';
 import { MessageSquare, Ticket, BarChart3, Sparkles, Zap, Shield } from 'lucide-react';
 
