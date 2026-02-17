@@ -4,6 +4,7 @@ import { createRazorpayOrder } from '../../../../lib/razorpay';
 
 
 
+// This is a backend API route in Next.js that creates a Razorpay payment order for a booking. 
 export async function POST(request: NextRequest) {
   try {
     const { amount, bookingId } = await request.json();

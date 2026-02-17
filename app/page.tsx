@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { MessageSquare, Ticket, BarChart3, Sparkles, Zap, Shield } from 'lucide-react';
 
+// This is the main homepage of the museum chatbot ticketing system. It features a hero section with animated background circles, a header with navigation, and sections showcasing the AI assistant, instant tickets, secure payment, and ticket types. The page encourages users to start booking their museum tickets through the chatbot interface.
+
 export default function Home() {
   return (
     <main className="min-h-screen relative overflow-hidden">

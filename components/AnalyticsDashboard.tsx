@@ -1,6 +1,8 @@
 //components/AnalyticsDashboard.tsx
 'use client';
 
+// This is a frontend component in Next.js that displays an analytics dashboard for museum ticket bookings. It fetches booking data from a Supabase database and shows key metrics like total bookings, total revenue, today's bookings, and the most popular ticket type. The dashboard updates in real-time using Supabase's real-time features and refreshes every 30 seconds.
+
 import { useEffect, useState } from 'react';
 import { BarChart3, Users, TrendingUp, DollarSign } from 'lucide-react';
 import { supabase } from '@/lib/supabase';

@@ -1,6 +1,8 @@
 //app/ticket/[id]/page.tsx
 'use client';
 
+// This is a frontend file in Next.js that displays ticket details and a QR code for a museum ticket. 
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import QRCodeGenerator from '@/components/QRCodeGenerator';

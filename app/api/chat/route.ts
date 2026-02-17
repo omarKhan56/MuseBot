@@ -1,3 +1,6 @@
+// app/api/chat/route.ts
+
+// This is a backend API route in Next.js that handles chat interactions with a Groq-based chatbot. 
 import { NextRequest, NextResponse } from 'next/server';
 import { chatWithGroq } from '@/lib/groq';
 

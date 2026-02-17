@@ -1,6 +1,11 @@
 //app/booking/[id]/page.tsx
 'use client';
 
+
+//this is frontend file or backend file?
+//this is a frontend file in Next.js that displays booking details and handles payment for a museum ticket booking. 
+
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import QRCodeGenerator from '@/components/QRCodeGenerator';
