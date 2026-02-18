@@ -2,9 +2,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Ticket, X, Sparkles } from 'lucide-react';
-import { ChatMessage } from '@/types';
-import { useRouter } from 'next/navigation';
+import { Send, Bot, User, Ticket, X, Sparkles } from 'lucide-react'; //Icon library for UI visuals.
+import { ChatMessage } from '@/types'; //
+import { useRouter } from 'next/navigation'; // Next.js router for navigation after booking. Used to navigate programmatically.
+
+// This is the ChatWidget component used in the chat page of the museum ticketing system. It provides a chat interface where users can interact with the AI assistant to book their tickets. The component handles user input, displays chat messages, and manages the booking flow, including extracting booking details from user messages and confirming bookings before showing the manual booking form. It also includes loading states and animations for a smooth user experience.
 
 export default function ChatWidget() {
   const router = useRouter();
@@ -52,7 +54,7 @@ const extractBookingFromChat = (message: string) => {
   const lower = message.toLowerCase();
 
   // Quantity
-  const qtyMatch = message.match(/\d+/);
+  const qtyMatch = message.match(/\d+/);// meaanin of this is to extract the first number from the user's message, which is assumed to represent the quantity of tickets they want to book. If a number is found, it will be parsed as an integer; otherwise, it defaults to 1.
   const quantity = qtyMatch ? parseInt(qtyMatch[0]) : 1;
 
   // Ticket type
