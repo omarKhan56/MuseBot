@@ -3,6 +3,8 @@ import ChatWidget from '@/components/ChatWidget';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
+// This is the chat page of the museum ticketing system. It features a header with a back button, an introduction to the AI assistant, and the ChatWidget component where users can interact with the chatbot to book their tickets. The page also includes a tip section to guide users on how to use the chatbot effectively.
+//this is frontend file in Next.js
 export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10 px-4">
