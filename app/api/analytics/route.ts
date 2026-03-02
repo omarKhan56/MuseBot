@@ -10,6 +10,9 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('payment_status', 'completed');
 
+      //line 8-11
+      // SELECT COUNT(*) FROM bookings WHERE payment_status = 'completed';
+
     // Total revenue
     const { data: revenueData } = await supabase
       .from('bookings')

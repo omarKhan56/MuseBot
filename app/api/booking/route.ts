@@ -1,5 +1,7 @@
 //app/api/booking/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+//he function of above line is : 
+// The line `import { NextRequest, NextResponse } from 'next/server';` is importing two classes, `NextRequest` and `NextResponse`, from the 'next/server' module. These classes are used in Next.js API routes to handle incoming HTTP requests and to send back HTTP responses.
 import { supabase } from '@/lib/supabase';
 import QRCode from 'qrcode';
 import { sendTicketEmail } from '@/lib/email';
