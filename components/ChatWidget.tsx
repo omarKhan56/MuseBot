@@ -18,9 +18,11 @@ export default function ChatWidget() {
     },
   ]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); //Shows loading animation while waiting for AI
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false); // Tracks:
+
+                                                                           //Did bot ask: “Proceed?”
 
   const [bookingData, setBookingData] = useState({
     visitor_name: '',
