@@ -52,7 +52,7 @@ export default function ChatWidget() {
 
   const totalAmount = ticketPrices[bookingData.ticket_type] * (bookingData.quantity || 1);
   // 🔥 Chatbot → Booking extraction helper
-const extractBookingFromChat = (message: string) => {
+const extractBookingFromChat = (message: string) => { // This  function is the core NLP engine in your code
   const lower = message.toLowerCase();
 
   // Quantity
@@ -117,7 +117,7 @@ const extractBookingFromChat = (message: string) => {
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Check if user wants to book
-      const lowerInput = userMessage.content.toLowerCase();
+      const lowerInput = userMessage.content.toLowerCase(); // What this does: Normalizes text and checks for keywords like "book", "reserve", "buy", or "purchase" to identify booking intent.
       // ❌ Handle cancel / edit before confirmation
 if (
   awaitingConfirmation &&
@@ -168,7 +168,7 @@ const bookingIntent =
   lowerInput.includes('book') ||
   lowerInput.includes('reserve')||
   lowerInput.includes('buy') ||
-  lowerInput.includes('purchase');
+  lowerInput.includes('purchase'); //line 167 to 171 :- This is NLP concept called "Intent Recognition". It checks if the user's message contains keywords that indicate they want to book tickets. If such keywords are found, it sets the bookingIntent variable to true, which triggers the booking extraction and confirmation flow in the chatbot.
 
 if (bookingIntent && !awaitingConfirmation) {
   const extracted = extractBookingFromChat(userMessage.content);
