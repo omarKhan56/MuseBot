@@ -1,36 +1,54 @@
-//app/api/tickets/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-
+import connectDB from '@/lib/mongodb';
+import Ticket from '@/lib/models/Ticket';
+import Booking from '@/lib/models/Booking';
+import Analytics from '@/lib/models/Analytics';
+ 
 export async function GET(request: NextRequest) {
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
     const ticketNumber = searchParams.get('ticketNumber');
-    const bookingId = searchParams.get('bookingId');
-
+    const bookingId    = searchParams.get('bookingId');
+ 
     if (ticketNumber) {
-      // Get specific ticket
-      const { data: ticket, error } = await supabase
-        .from('tickets')
-        .select('*, booking:bookings(*)')
-        .eq('ticket_number', ticketNumber)
-        .single();
-
-      if (error) throw error;
-      return NextResponse.json({ ticket });
+      // Get specific ticket by ticket number
+      const ticket = await Ticket.findOne({ ticket_number: ticketNumber }).lean() as any;
+      if (!ticket) {
+        return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+      }
+ 
+      const booking = await Booking.findById(ticket.booking_id).lean() as any;
+ 
+      return NextResponse.json({
+        ticket: {
+          ...ticket,
+          id: ticket._id.toString(),
+          _id: undefined,
+          booking: booking
+            ? { ...booking, id: booking._id.toString(), _id: undefined }
+            : null,
+        },
+      });
     }
-
+ 
     if (bookingId) {
       // Get all tickets for a booking
-      const { data: tickets, error } = await supabase
-        .from('tickets')
-        .select('*, booking:bookings(*)')
-        .eq('booking_id', bookingId);
-
-      if (error) throw error;
-      return NextResponse.json({ tickets });
+      const tickets = await Ticket.find({ booking_id: bookingId }).lean();
+      const booking = await Booking.findById(bookingId).lean() as any;
+ 
+      return NextResponse.json({
+        tickets: tickets.map((t: any) => ({
+          ...t,
+          id: t._id.toString(),
+          _id: undefined,
+          booking: booking
+            ? { ...booking, id: booking._id.toString(), _id: undefined }
+            : null,
+        })),
+      });
     }
-
+ 
     return NextResponse.json(
       { error: 'Please provide ticketNumber or bookingId' },
       { status: 400 }
@@ -43,37 +61,41 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
+ 
 export async function PUT(request: NextRequest) {
   try {
+    await connectDB();
     const { ticketNumber, action } = await request.json();
-
+ 
     if (action === 'use') {
       // Mark ticket as used
-      const { data, error } = await supabase
-        .from('tickets')
-        .update({ is_used: true, used_at: new Date().toISOString() })
-        .eq('ticket_number', ticketNumber)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const ticket = await Ticket.findOneAndUpdate(
+        { ticket_number: ticketNumber },
+        { is_used: true, used_at: new Date() },
+        { new: true }
+      ).lean() as any;
+ 
+      if (!ticket) {
+        return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+      }
+ 
       // Log analytics
-      await supabase.from('analytics').insert([
-        {
-          event_type: 'ticket_used',
-          event_data: { ticket_number: ticketNumber },
+      await Analytics.create({
+        event_type: 'ticket_used',
+        event_data: { ticket_number: ticketNumber },
+      });
+ 
+      return NextResponse.json({
+        success: true,
+        ticket: {
+          ...ticket,
+          id: ticket._id.toString(),
+          _id: undefined,
         },
-      ]);
-
-      return NextResponse.json({ success: true, ticket: data });
+      });
     }
-
-    return NextResponse.json(
-      { error: 'Invalid action' },
-      { status: 400 }
-    );
+ 
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Ticket update error:', error);
     return NextResponse.json(
@@ -82,3 +104,4 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+ 

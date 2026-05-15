@@ -1,12 +1,10 @@
 //app/admin/page.tsx
 'use client';
-
 import { useEffect, useState } from 'react';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Mail, User, Phone, CreditCard } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-
+ 
 interface Booking {
   id: string;
   visitor_name: string;
@@ -19,52 +17,30 @@ interface Booking {
   payment_status: string;
   created_at: string;
 }
-
+ 
 export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     fetchBookings();
-    
-    // Set up real-time subscription
-    const subscription = supabase
-      .channel('bookings_channel')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'bookings' },
-        (payload) => {
-          console.log('Change received!', payload);
-          fetchBookings(); // Refresh data when changes occur
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Poll every 30 seconds for new bookings (replaces Supabase real-time)
+    const interval = setInterval(fetchBookings, 30000);
+    return () => clearInterval(interval);
   }, []);
-
+ 
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) {
-        console.error('Error fetching bookings:', error);
-        return;
-      }
-
-      setBookings(data || []);
+      const response = await fetch('/api/admin/bookings');
+      const data = await response.json();
+      setBookings(data.bookings || []);
     } catch (error) {
       console.error('Fetch error:', error);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
@@ -77,7 +53,7 @@ export default function AdminPage() {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
+ 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -87,7 +63,7 @@ export default function AdminPage() {
       minute: '2-digit',
     });
   };
-
+ 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="container mx-auto">
@@ -98,7 +74,7 @@ export default function AdminPage() {
           <ArrowLeft className="w-5 h-5" />
           Back to Home
         </Link>
-
+ 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Admin Dashboard
@@ -107,9 +83,9 @@ export default function AdminPage() {
             Monitor bookings, revenue, and analytics in real-time
           </p>
         </div>
-
+ 
         <AnalyticsDashboard />
-
+ 
         <div className="mt-8 bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
@@ -122,7 +98,7 @@ export default function AdminPage() {
               Refresh
             </button>
           </div>
-
+ 
           {loading ? (
             <div className="text-center py-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
@@ -231,14 +207,14 @@ export default function AdminPage() {
               </table>
             </div>
           )}
-
+ 
           {bookings.length > 0 && (
             <div className="mt-6 flex justify-between items-center">
               <p className="text-sm text-gray-600">
                 Showing {bookings.length} recent booking{bookings.length !== 1 ? 's' : ''}
               </p>
               <p className="text-xs text-gray-500">
-                Updates automatically in real-time
+                Auto-refreshes every 30 seconds
               </p>
             </div>
           )}

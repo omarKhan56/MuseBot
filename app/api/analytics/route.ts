@@ -1,64 +1,101 @@
-//app/api/analytics/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+
+import connectDB from '@/lib/mongodb';
+
+import Booking from '@/lib/models/Booking';
 
 export async function GET(request: NextRequest) {
   try {
-    // Total bookings
-    const { count: totalBookings } = await supabase
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('payment_status', 'completed');
+    await connectDB();
 
-      //line 8-11
-      // SELECT COUNT(*) FROM bookings WHERE payment_status = 'completed';
+    // Total paid bookings
+    const totalBookings =
+      await Booking.countDocuments({
+        payment_status: 'paid',
+      });
 
     // Total revenue
-    const { data: revenueData } = await supabase
-      .from('bookings')
-      .select('total_amount')
-      .eq('payment_status', 'completed');
+    const revenueResult =
+      await Booking.aggregate([
+        {
+          $match: {
+            payment_status: 'paid',
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: '$total_amount',
+            },
+          },
+        },
+      ]);
 
-    const totalRevenue = revenueData?.reduce(
-      (sum, booking) => sum + parseFloat(booking.total_amount),
-      0
-    ) || 0;
+    const totalRevenue =
+      revenueResult[0]?.total || 0;
 
     // Today's bookings
-    const today = new Date().toISOString().split('T')[0];
-    const { count: todayBookings } = await supabase
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('payment_status', 'completed')
-      .gte('created_at', today);
+    const today = new Date();
 
-    // Popular ticket type
-    const { data: ticketTypes } = await supabase
-      .from('bookings')
-      .select('ticket_type')
-      .eq('payment_status', 'completed');
+    today.setHours(0, 0, 0, 0);
 
-    const ticketCounts: { [key: string]: number } = {};
-    ticketTypes?.forEach((booking) => {
-      ticketCounts[booking.ticket_type] =
-        (ticketCounts[booking.ticket_type] || 0) + 1;
-    });
+    const todayBookings =
+      await Booking.countDocuments({
+        payment_status: 'paid',
+        createdAt: {
+          $gte: today,
+        },
+      });
 
-    const popularTicket = Object.entries(ticketCounts).sort(
-      ([, a], [, b]) => b - a
-    )[0]?.[0];
+    // Most popular ticket
+    const ticketTypeResult =
+      await Booking.aggregate([
+        {
+          $match: {
+            payment_status: 'paid',
+          },
+        },
+        {
+          $group: {
+            _id: '$ticket_type',
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+        {
+          $sort: {
+            count: -1,
+          },
+        },
+        {
+          $limit: 1,
+        },
+      ]);
+
+    const popularTicket =
+      ticketTypeResult[0]?._id || 'N/A';
 
     return NextResponse.json({
-      totalBookings: totalBookings || 0,
-      totalRevenue: totalRevenue.toFixed(2),
-      todayBookings: todayBookings || 0,
-      popularTicket: popularTicket || 'N/A',
+      totalBookings,
+      totalRevenue,
+      todayBookings,
+      popularTicket,
     });
   } catch (error) {
-    console.error('Analytics API error:', error);
+    console.error(
+      'Analytics API error:',
+      error
+    );
+
     return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
-      { status: 500 }
+      {
+        error: 'Failed to fetch analytics',
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
