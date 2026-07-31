@@ -1,3 +1,4 @@
+//app/api/booking/[id]/route.ts
 import { NextResponse } from 'next/server';
 
 import dbConnect from '@/lib/mongodb';

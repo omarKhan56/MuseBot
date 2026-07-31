@@ -1,3 +1,4 @@
+//app/api/tickets/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Ticket from '@/lib/models/Ticket';

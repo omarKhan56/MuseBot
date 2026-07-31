@@ -1,3 +1,5 @@
+// lib/groq.ts
+
 import Groq from 'groq-sdk';
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions';
 

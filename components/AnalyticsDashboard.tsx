@@ -1,3 +1,5 @@
+//components/AnalyticsDashboard.tsx
+
 'use client';
 import { useEffect, useState } from 'react';
 import { BarChart3, Users, TrendingUp, DollarSign } from 'lucide-react';

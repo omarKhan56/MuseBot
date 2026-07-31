@@ -1,3 +1,4 @@
+// lib/models/Analytics.ts
 import mongoose, { Schema, Document } from 'mongoose';
  
 export interface IAnalytics extends Document {
